@@ -1,0 +1,55 @@
+= Rendering AsciiDoc files with Podman
+
+== Summary
+
+This repository contains a simple [filename]**_Containerfile_** that defines a container image including [command]`asciidoctor` and [command]`asciidoctor-pdf` to render AsciiDoc content as HTML or PDF, respectively.
+
+The files in this repository serve as a simple example of how to write a [filename]**_Containerfile_** which can perform more than one task with the same overall goal: rendering AsciiDoc content.
+
+== Building the container image
+
+In the directory containing this repository, run the following command to generate a local container image:
+
+----
+$ podman build -f Containerfile -t adoc
+----
+
+This command will create a local container image tagged as `localhost/adoc`.
+
+Alternatively, use the [filename]**_Makefile_**:
+
+----
+$ make container
+----
+
+== Running the container
+
+This container can generate HTML or PDF output for AsciiDoc files once the container image has been generated.
+
+In order to access AsciiDoc files contained on the host machine, we must mount a directory containing AsciiDoc files from the host machine into the file system of the container.
+The [filename]**_Containerfile_** defines a volume mount in [filename]**_/docs_** on the container.
+To generate output of an AsciiDoc file in the current directory on your host machine, mount the absolute path to the host directory as [filename]**_/docs_** in the container.
+
+To generate output of the given AsciiDoc file within the mounted directory:
+
+[subs="+quotes"]
+----
+$ podman run --rm -v $(pwd):/docs adoc __[html,pdf]__ README.adoc
+----
+
+Replace `__[html,pdf]__` with either `html` or `pdf` for the desired output format.
+
+Alternatively, use the [filename]**_Makefile_**:
+
+[subs="+quotes"]
+----
+$ make __[html,pdf,all]__
+----
+
+== Exploring
+
+To understand how all of this runs and works together, please see each file in this repository and how it is configured.
+
+The core idea is to configure the _runtime_ for the container image in the [filename]**_Containerfile_** and encapsulate the _logic_ for switching output formats in [filename]**_entrypoint.sh_**. Note that the entrypoint is written on the host machine and copied into the container as [filename]**_/sbin/entrypoint.sh_**.
+
+And remember: have fun!
